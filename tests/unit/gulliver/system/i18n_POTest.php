@@ -70,10 +70,25 @@ class i18n_POTest extends PHPUnit_Framework_TestCase
      * @todo   Implement testAddTranslatorComment().
      */
     public function testAddTranslatorComment($obj)
-    {
-      $obj->addTranslatorComment('COMMENT OF TRANSLATION');
+    { //$cur_encoding = mb_detect_encoding('COMMENT OF TRANSLATION');
+      //utf8_encode
+      $obj->addTranslatorComment('COMMENT OF TRANSLATION'); //English
+      $obj->addTranslatorComment("Jap'iqmasiqa mana  juñiyniyuq kashan kay raphipiqa."); //Quechua
+      $obj->addTranslatorComment('رمز عبور اشتباه است'); //Persian
+      $obj->addTranslatorComment('Brugeren har ingen rettigheder på denne side.'); //Danish
+      $obj->addTranslatorComment('ليس لدى المستخدم حقوق على هذه الصفحة'); //Arabic
+      $obj->addTranslatorComment('用户无此页权限'); //Chinese
+      $obj->addTranslatorComment('Неправильный пароль'); //Russian
+
       $vlineas = file(PATH_TRUNK.'/tests/shared/filesPO/processmaker.en.po'); 
-      $this->assertEquals( trim($vlineas[4]), '# COMMENT OF TRANSLATION');
+      
+      $this->assertEquals(trim($vlineas[4])  , '# COMMENT OF TRANSLATION'); //English
+      $this->assertEquals(trim($vlineas[5])  , "# Jap'iqmasiqa mana  juñiyniyuq kashan kay raphipiqa."); //Quechua 
+      $this->assertEquals(trim($vlineas[6])  , '# رمز عبور اشتباه است'); //Persian
+      $this->assertEquals(trim($vlineas[7])  , '# Brugeren har ingen rettigheder på denne side.'); //Danish
+      $this->assertEquals(trim($vlineas[8])  , '# ليس لدى المستخدم حقوق على هذه الصفحة'); //Arabic
+      $this->assertEquals(trim($vlineas[9])  , '# 用户无此页权限'); //Chinese
+      $this->assertEquals(trim($vlineas[10]) , '# Неправильный пароль'); //Russian
       return $obj;
     }
 
@@ -84,9 +99,9 @@ class i18n_POTest extends PHPUnit_Framework_TestCase
      */
     public function testAddExtractedComment($obj)
     {
-      $obj->addTranslatorComment('COMMENT EXTRA OF TRANSLATION');
+      $obj->addExtractedComment('COMMENT EXTRA OF TRANSLATION');
       $vlineas = file(PATH_TRUNK.'/tests/shared/filesPO/processmaker.en.po'); 
-      $this->assertEquals( trim($vlineas[5]), '# COMMENT EXTRA OF TRANSLATION');
+      $this->assertEquals( trim($vlineas[11]), '#. COMMENT EXTRA OF TRANSLATION');
       return $obj;
     }
 
@@ -99,7 +114,7 @@ class i18n_POTest extends PHPUnit_Framework_TestCase
     {
       $obj->addReference('REFERENCE');
       $vlineas = file(PATH_TRUNK.'/tests/shared/filesPO/processmaker.en.po'); 
-      $this->assertEquals( trim($vlineas[6]), '#: REFERENCE');
+      $this->assertEquals( trim($vlineas[12]), '#: REFERENCE');
       return $obj;
     }
 
@@ -112,7 +127,7 @@ class i18n_POTest extends PHPUnit_Framework_TestCase
     {
       $obj->addFlag('FLAG');
       $vlineas = file(PATH_TRUNK.'/tests/shared/filesPO/processmaker.en.po'); 
-      $this->assertEquals( trim($vlineas[7]), '#, FLAG');
+      $this->assertEquals( trim($vlineas[13]), '#, FLAG');
       return $obj;
     }
 
@@ -125,7 +140,7 @@ class i18n_POTest extends PHPUnit_Framework_TestCase
     {
       $obj->addPreviousUntranslatedString('PREVIOUS UNTRANSLATED STRING');
       $vlineas = file(PATH_TRUNK.'/tests/shared/filesPO/processmaker.en.po'); 
-      $this->assertEquals( trim($vlineas[8]), '#| PREVIOUS UNTRANSLATED STRING');
+      $this->assertEquals( trim($vlineas[14]), '#| PREVIOUS UNTRANSLATED STRING');
       return $obj;        
     }
 
@@ -138,8 +153,8 @@ class i18n_POTest extends PHPUnit_Framework_TestCase
     {
       $obj->addTranslation('ID_TRANSLATION','MSG_TRANSLATION');
       $vlineas = file(PATH_TRUNK.'/tests/shared/filesPO/processmaker.en.po'); 
-      $this->assertEquals( trim($vlineas[9]), 'msgid "ID_TRANSLATION"');
-      $this->assertEquals( trim($vlineas[10]), 'msgstr "MSG_TRANSLATION"');
+      $this->assertEquals( trim($vlineas[15]), 'msgid "ID_TRANSLATION"');
+      $this->assertEquals( trim($vlineas[16]), 'msgstr "MSG_TRANSLATION"');
       return $obj;   
     }   
 
@@ -149,6 +164,19 @@ class i18n_POTest extends PHPUnit_Framework_TestCase
      */
     public function testPrepare()
     {
+      //case Chinese
+      G::loadClass('i18n_po');
+      $objC = new i18n_PO (PATH_TRUNK.'/tests/shared/filesPO/processmaker.ru-RU.po'); 
+      $this->assertEquals(trim($objC->prepare('Content-Transfer-Encoding: 8bit\n \t \r', false)), 'Content-Transfer-Encoding: 8bit');
+      $this->assertEquals(trim($objC->prepare('Content-Transfer-Encoding: 8bit\n \t \r', true)), 'Content-Transfer-Encoding: 8bit\n \t \r');
+
+      //case Russian
+      G::loadClass('i18n_po');
+      $objR = new i18n_PO (PATH_TRUNK.'/tests/shared/filesPO/processmaker.ru-RU.po'); 
+      $this->assertEquals(trim($objR->prepare('Content-Transfer-Encoding: 8bit\n \t \r', false)), 'Content-Transfer-Encoding: 8bit');
+      $this->assertEquals(trim($objR->prepare('Content-Transfer-Encoding: 8bit\n \t \r', true)), 'Content-Transfer-Encoding: 8bit\n \t \r');
+      
+      //case English
       G::loadClass('i18n_po');
       $obj = new i18n_PO (PATH_TRUNK.'/tests/shared/filesPO/processmaker.en.po'); 
       $this->assertEquals(trim($obj->prepare('Content-Transfer-Encoding: 8bit\n \t \r', false)), 'Content-Transfer-Encoding: 8bit');
@@ -178,6 +206,43 @@ class i18n_POTest extends PHPUnit_Framework_TestCase
      */
     public function testGetTranslation()
     {
+    //** case Quechua **
+      G::loadClass('i18n_po');
+      $obj = new i18n_PO (PATH_TRUNK.'/tests/shared/filesPO/processmaker.qu-BO.po'); 
+      $obj->readInit();
+      $this->assertNotEmpty($obj->getTranslation());
+
+    //** case Persian **
+      G::loadClass('i18n_po');
+      $obj = new i18n_PO (PATH_TRUNK.'/tests/shared/filesPO/processmaker.fa-IR.po'); 
+      $obj->readInit();
+      $this->assertNotEmpty($obj->getTranslation());
+
+    //** case Danish **
+      G::loadClass('i18n_po');
+      $obj = new i18n_PO (PATH_TRUNK.'/tests/shared/filesPO/processmaker.da-DK.po'); 
+      $obj->readInit();
+      $this->assertNotEmpty($obj->getTranslation());
+
+    //** case Arabic **
+      G::loadClass('i18n_po');
+      $obj = new i18n_PO (PATH_TRUNK.'/tests/shared/filesPO/processmaker.ar-EG.po'); 
+      $obj->readInit();
+      $this->assertNotEmpty($obj->getTranslation());
+
+    //** case Chinese ** 
+      G::loadClass('i18n_po');
+      $obj = new i18n_PO (PATH_TRUNK.'/tests/shared/filesPO/processmaker.zh-CN.po'); 
+      $obj->readInit();
+      $this->assertNotEmpty($obj->getTranslation());
+
+    //** case Russian **
+      G::loadClass('i18n_po');
+      $obj = new i18n_PO (PATH_TRUNK.'/tests/shared/filesPO/processmaker.ru-RU.po'); 
+      $obj->readInit();
+      $this->assertNotEmpty($obj->getTranslation());
+      
+    //** case English **
       G::loadClass('i18n_po');
       $obj = new i18n_PO (PATH_TRUNK.'/tests/shared/filesPO/processmakerTRANSLATION.en.po'); 
       $obj->readInit();
